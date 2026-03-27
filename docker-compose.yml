@@ -23,7 +23,7 @@ services:
       start_period: 60s
 
   flask-app:
-    image: my-app:latest
+    image: byteaagam/two-tier-flask-app:latest
     container_name: flask-app
     ports:
       - "5000:5000"
