@@ -6,7 +6,6 @@ WORKDIR /app
 
 # install required packages for system
 RUN apt-get update \
-    && apt-get upgrade -y \
     && apt-get install -y gcc default-libmysqlclient-dev pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
