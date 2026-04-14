@@ -1,5 +1,5 @@
 pipeline {
-    agent { label "dev" };
+    agent { label "dev" }
 
     stages {
         stage("Code Clone") {
@@ -27,9 +27,11 @@ pipeline {
                     usernameVariable: "dockerHubUser",
                     passwordVariable: "dockerHubPass"
                 )]) {
-                    sh "echo ${dockerHubPass} | docker login -u ${dockerHubUser} --password-stdin"
-                    sh "docker tag two-tier-flask-app:latest ${dockerHubUser}/two-tier-flask-app:latest"
-                    sh "docker push ${dockerHubUser}/two-tier-flask-app:latest"
+                    sh '''
+                    echo "$dockerHubPass" | docker login -u "$dockerHubUser" --password-stdin
+                    docker tag two-tier-flask-app:latest "$dockerHubUser"/two-tier-flask-app:latest
+                    docker push "$dockerHubUser"/two-tier-flask-app:latest
+                    '''
                 }
             }
         }
@@ -39,6 +41,42 @@ pipeline {
                 sh "docker compose down || true"
                 sh "docker compose up -d --build --force-recreate flask-app"
             }
+        }
+    }
+
+    post {
+        success {
+            emailext(
+                to: "aagam.cloudops@gmail.com",
+                subject: "Jenkins Build Success - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """Hello,
+
+Job Name: ${env.JOB_NAME}
+Build Number: ${env.BUILD_NUMBER}
+Build Status: SUCCESS
+Build URL: ${env.BUILD_URL}
+
+Regards,
+Jenkins
+"""
+            )
+        }
+
+        failure {
+            emailext(
+                to: "aagam.cloudops@gmail.com",
+                subject: "Jenkins Build Failed - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """Hello,
+
+Job Name: ${env.JOB_NAME}
+Build Number: ${env.BUILD_NUMBER}
+Build Status: FAILURE
+Build URL: ${env.BUILD_URL}
+
+Regards,
+Jenkins
+"""
+            )
         }
     }
 }
