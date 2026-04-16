@@ -7,6 +7,9 @@ pipeline {
                 git url: "https://github.com/byteaagam/two-tier-flask-app.git", branch: "master"
             }
         }
+        stage("Trivy File System Scan"){
+            sh "trivy fs . -o results.json"
+        }
 
         stage("Build") {
             steps {
